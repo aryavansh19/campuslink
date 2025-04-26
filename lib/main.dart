@@ -37,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
     String password = _passwordController.text.trim();
 
     // Dummy Authentication
-    if (email == 'admin@example.com' && password == 'password123') {
+    if (email == 'admin' && password == 'password') {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LiveFeedPage()),

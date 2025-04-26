@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 
-class LiveFeedPage extends StatelessWidget {
+class LiveFeedPage extends StatefulWidget {
   const LiveFeedPage({super.key});
 
-  // Dummy data for posts
-  final List<Map<String, String>> dummyPosts = const [
+  @override
+  State<LiveFeedPage> createState() => _LiveFeedPageState();
+}
+
+class _LiveFeedPageState extends State<LiveFeedPage> {
+  List<Map<String, String>> posts = [
     {
       'category': 'Lecture Update',
       'title': 'Math class moved to Room 203',
@@ -27,33 +31,119 @@ class LiveFeedPage extends StatelessWidget {
     },
   ];
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Live Feed'),
-        centerTitle: true,
-      ),
-      body: ListView.builder(
-        itemCount: dummyPosts.length,
-        itemBuilder: (context, index) {
-          final post = dummyPosts[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            elevation: 4,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: ListTile(
-              leading: _buildCategoryIcon(post['category']),
-              title: Text(post['title'] ?? ''),
-              subtitle: Text(post['description'] ?? ''),
+  int _selectedIndex = 0; // For Bottom Navigation Bar
+
+  Future<void> _refreshPosts() async {
+    await Future.delayed(const Duration(seconds: 1)); // Fake delay
+    setState(() {
+      posts.shuffle(); // Shuffle posts to simulate update
+    });
+  }
+
+  void _addNewPost() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        TextEditingController titleController = TextEditingController();
+        TextEditingController descriptionController = TextEditingController();
+        String selectedCategory = 'Lecture Update';
+
+        return AlertDialog(
+          title: const Text('Add New Post'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                DropdownButtonFormField<String>(
+                  value: selectedCategory,
+                  items: [
+                    'Lecture Update',
+                    'Queue Alert',
+                    'Lost & Found',
+                    'Event Update'
+                  ].map((category) {
+                    return DropdownMenuItem<String>(
+                      value: category,
+                      child: Text(category),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      selectedCategory = value;
+                    }
+                  },
+                  decoration: const InputDecoration(labelText: 'Category'),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(labelText: 'Description'),
+                ),
+              ],
             ),
-          );
-        },
-      ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                if (titleController.text.isNotEmpty &&
+                    descriptionController.text.isNotEmpty) {
+                  setState(() {
+                    posts.insert(0, {
+                      'category': selectedCategory,
+                      'title': titleController.text,
+                      'description': descriptionController.text,
+                    });
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  // Helper method to pick an icon based on category
+  void _onTabTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  Widget _buildPageContent() {
+    if (_selectedIndex == 0) {
+      return RefreshIndicator(
+        onRefresh: _refreshPosts,
+        child: ListView.builder(
+          itemCount: posts.length,
+          itemBuilder: (context, index) {
+            final post = posts[index];
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                leading: _buildCategoryIcon(post['category']),
+                title: Text(post['title'] ?? ''),
+                subtitle: Text(post['description'] ?? ''),
+              ),
+            );
+          },
+        ),
+      );
+    } else if (_selectedIndex == 1) {
+      return const Center(child: Text('Lost & Found Page - Coming Soon'));
+    } else {
+      return const Center(child: Text('Profile Page - Coming Soon'));
+    }
+  }
+
   Widget _buildCategoryIcon(String? category) {
     IconData icon;
     Color color;
@@ -83,6 +173,41 @@ class LiveFeedPage extends StatelessWidget {
     return CircleAvatar(
       backgroundColor: color.withOpacity(0.2),
       child: Icon(icon, color: color),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('CampusLink'),
+        centerTitle: true,
+      ),
+      body: _buildPageContent(),
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton(
+        onPressed: _addNewPost,
+        child: const Icon(Icons.add),
+      )
+          : null,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onTabTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.feed),
+            label: 'Feed',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Lost & Found',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
     );
   }
 }
