@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class IndoorMapPage extends StatelessWidget {
   const IndoorMapPage({super.key});
 
-  // Updated Dummy room data with better positioning
   final List<Map<String, dynamic>> rooms = const [
     {
       'roomName': 'Room 101',

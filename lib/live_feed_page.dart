@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'indoor_map_page.dart';
+import 'indoor_map_page.dart'; // Import IndoorMapPage here!
 import 'profile_page.dart';
+import 'lost_and_found_page.dart'; // Import Lost & Found Page here!
 
 class LiveFeedPage extends StatefulWidget {
   const LiveFeedPage({super.key});
@@ -11,7 +12,7 @@ class LiveFeedPage extends StatefulWidget {
 }
 
 class _LiveFeedPageState extends State<LiveFeedPage> {
-  List<Map<String, dynamic>> posts = [
+  List<Map<String, String>> posts = [
     {
       'category': 'Lecture Update',
       'title': 'Math class moved to Room 203',
@@ -32,16 +33,6 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       'title': 'Coding Competition Today!',
       'description': 'Starts at 2 PM in Auditorium. Register at desk.'
     },
-    {
-      'category': 'Transportation Update',
-      'title': 'Bus 5 running 10 mins late',
-      'description': 'Expect delays if you’re catching the 5 PM shuttle.'
-    },
-    {
-      'category': 'Sports Update',
-      'title': 'Football Match Today',
-      'description': 'CS Dept vs EE Dept at 4:30 PM on Main Ground.'
-    },
   ];
 
   int _selectedIndex = 0;
@@ -61,10 +52,8 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
   @override
   void initState() {
     super.initState();
-    _findNextClass();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _updateTimeLeft();
-    });
+    _findNextClass(); // Initialize the next class
+    _timer = Timer.periodic(const Duration(seconds: 1), _updateTimeLeft); // Update time every second
   }
 
   @override
@@ -73,32 +62,7 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
     super.dispose();
   }
 
-  void _findNextClass() {
-    final now = TimeOfDay.now();
-    timetable.sort((a, b) =>
-        (a['time'] as TimeOfDay).hour.compareTo((b['time'] as TimeOfDay).hour));
-
-    for (var entry in timetable) {
-      final classTime = entry['time'] as TimeOfDay;
-      if (classTime.hour > now.hour ||
-          (classTime.hour == now.hour && classTime.minute > now.minute)) {
-        setState(() {
-          _nextClassSubject = entry['subject'];
-          _nextClassTime = classTime;
-          _updateTimeLeft();
-        });
-        return;
-      }
-    }
-
-    setState(() {
-      _nextClassSubject = '';
-      _nextClassTime = null;
-      _timeLeft = null;
-    });
-  }
-
-  void _updateTimeLeft() {
+  void _updateTimeLeft(Timer timer) {
     if (_nextClassTime == null) return;
 
     final now = DateTime.now();
@@ -121,11 +85,104 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
     }
   }
 
-  Future<void> _refreshPosts() async {
-    await Future.delayed(const Duration(seconds: 1));
+  // Define the method _findNextClass
+  void _findNextClass() {
+    final now = TimeOfDay.now();
+
+    timetable.sort((a, b) =>
+        (a['time'] as TimeOfDay).hour.compareTo((b['time'] as TimeOfDay).hour));
+
+    for (var entry in timetable) {
+      final classTime = entry['time'] as TimeOfDay;
+      if (classTime.hour > now.hour ||
+          (classTime.hour == now.hour && classTime.minute > now.minute)) {
+        setState(() {
+          _nextClassSubject = entry['subject'];
+          _nextClassTime = classTime;
+          _updateTimeLeft(Timer(Duration(seconds: 1), () {})); // Calling updateTimeLeft with Timer to recalculate time
+        });
+        return;
+      }
+    }
+
     setState(() {
-      posts.shuffle();
+      _nextClassSubject = '';
+      _nextClassTime = null;
+      _timeLeft = null;
     });
+  }
+
+  Future<void> _refreshPosts() async {
+    await Future.delayed(const Duration(seconds: 1)); // Fake delay
+    setState(() {
+      posts.shuffle(); // Shuffle posts to simulate update
+    });
+  }
+
+  void _addNewPost() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        TextEditingController titleController = TextEditingController();
+        TextEditingController descriptionController = TextEditingController();
+        String selectedCategory = 'Lecture Update';
+
+        return AlertDialog(
+          title: const Text('Add New Post'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                DropdownButtonFormField<String>(
+                  value: selectedCategory,
+                  items: [
+                    'Lecture Update',
+                    'Queue Alert',
+                    'Lost & Found',
+                    'Event Update'
+                  ].map((category) {
+                    return DropdownMenuItem<String>(value: category, child: Text(category));
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      selectedCategory = value;
+                    }
+                  },
+                  decoration: const InputDecoration(labelText: 'Category'),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(labelText: 'Description'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                if (titleController.text.isNotEmpty &&
+                    descriptionController.text.isNotEmpty) {
+                  setState(() {
+                    posts.insert(0, {
+                      'category': selectedCategory,
+                      'title': titleController.text,
+                      'description': descriptionController.text,
+                    });
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _onTabTapped(int index) {
@@ -163,11 +220,11 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
         ],
       );
     } else if (_selectedIndex == 1) {
-      return const Center(child: Text('Lost & Found Page - Coming Soon'));
+      return const LostAndFoundPage(); // Navigate to Lost and Found page
     } else if (_selectedIndex == 2) {
-      return const IndoorMapPage();
+      return const IndoorMapPage(); // Navigate to Indoor Map page
     } else {
-      return const ProfilePage();
+      return const ProfilePage(); // Navigate to Profile page
     }
   }
 
@@ -244,7 +301,6 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
             ),
           ),
         ),
-
         if (_showAllClasses)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -261,11 +317,12 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
                 return ListTile(
                   leading: const Icon(Icons.class_),
                   title: Text('${entry['subject']} - Room ${entry['room']}'),
-                  subtitle: Text('${time.format(context)}'),
+                  subtitle: Text(time.format(context)),
                 );
-              }).toList(),
+              })
+                  .toList(),
             ),
-          )
+          ),
       ],
     );
   }
@@ -290,14 +347,6 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       case 'Event Update':
         icon = Icons.event;
         color = Colors.purple;
-        break;
-      case 'Transportation Update':
-        icon = Icons.directions_bus;
-        color = Colors.teal;
-        break;
-      case 'Sports Update':
-        icon = Icons.sports_soccer;
-        color = Colors.redAccent;
         break;
       default:
         icon = Icons.info;
@@ -346,9 +395,5 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
         ],
       ),
     );
-  }
-
-  void _addNewPost() {
-    // Add post logic here
   }
 }

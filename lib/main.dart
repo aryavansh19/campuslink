@@ -1,6 +1,6 @@
-import 'dart:ui'; // Needed for ImageFilter
 import 'package:flutter/material.dart';
 import 'live_feed_page.dart'; // Import your LiveFeedPage (Make sure it's created)
+import 'firebase_auth_test_page.dart'; // Import test page
 
 void main() {
   runApp(const MyApp());
@@ -54,20 +54,24 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, // Important for keyboard
       body: Stack(
         children: [
-          // Background Image stretched fully
+          // Gradient Background
           Positioned.fill(
-            child: Image.asset(
-              'assets/img.png', // Your background image
-              fit: BoxFit.cover,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue.shade300, Colors.blue.shade700],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
             ),
           ),
           // Semi-transparent background layer
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withOpacity(0.5),
             ),
           ),
           // Login Form
@@ -81,9 +85,8 @@ class _LoginPageState extends State<LoginPage> {
                   width: _isFocused ? 360 : 280,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.25),
+                    color: Colors.white.withOpacity(0.95),
                     borderRadius: BorderRadius.circular(25),
-                    border: Border.all(color: Colors.white.withOpacity(0.3)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -98,7 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                       const Icon(
                         Icons.lock_outline,
                         size: 70,
-                        color: Colors.white,
+                        color: Colors.blue,
                       ),
                       const SizedBox(height: 20),
                       const Text(
@@ -106,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                       const SizedBox(height: 30),
@@ -118,58 +121,31 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         child: Column(
                           children: [
-                            TextField(
+                            // Email TextField
+                            _buildTextField(
                               controller: _emailController,
-                              style: const TextStyle(color: Colors.white),
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white.withOpacity(0.3),
-                                prefixIcon: const Icon(Icons.email_outlined, color: Colors.white),
-                                hintText: 'Email',
-                                hintStyle: const TextStyle(color: Colors.white70),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              onTap: () {
-                                setState(() {
-                                  _isFocused = true;
-                                });
-                              },
+                              icon: Icons.email_outlined,
+                              hint: 'Email',
                             ),
                             const SizedBox(height: 20),
-                            TextField(
+                            // Password TextField
+                            _buildTextField(
                               controller: _passwordController,
+                              icon: Icons.lock_outline_rounded,
+                              hint: 'Password',
                               obscureText: true,
-                              style: const TextStyle(color: Colors.white),
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white.withOpacity(0.3),
-                                prefixIcon: const Icon(Icons.lock_outline_rounded, color: Colors.white),
-                                hintText: 'Password',
-                                hintStyle: const TextStyle(color: Colors.white70),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              onTap: () {
-                                setState(() {
-                                  _isFocused = true;
-                                });
-                              },
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 30),
+                      // Login Button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: _login,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
+                            backgroundColor: Colors.blue,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -179,20 +155,34 @@ class _LoginPageState extends State<LoginPage> {
                             'Login',
                             style: TextStyle(
                               fontSize: 18,
-                              color: Colors.black,
+                              color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 12),
+                      // Forgot Password Link
                       TextButton(
                         onPressed: () {
                           // TODO: Forgot Password Action
                         },
                         child: const Text(
                           'Forgot Password?',
-                          style: TextStyle(color: Colors.white70),
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                      ),
+                      // Firebase Test
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const FirebaseAuthTestPage()),
+                          );
+                        },
+                        child: const Text(
+                          'Test Firebase Connection',
+                          style: TextStyle(color: Colors.black54),
                         ),
                       ),
                     ],
@@ -202,6 +192,31 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required IconData icon,
+    required String hint,
+    bool obscureText = false,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      style: const TextStyle(color: Colors.black),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.grey.shade200,
+        prefixIcon: Icon(icon, color: Colors.black),
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.black54),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16),
       ),
     );
   }
