@@ -1,4 +1,4 @@
-import 'dart:async'; // For Timer
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'indoor_map_page.dart';
 import 'profile_page.dart';
@@ -32,16 +32,6 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       'title': 'Coding Competition Today!',
       'description': 'Starts at 2 PM in Auditorium. Register at desk.'
     },
-    {
-      'category': 'Transportation Update',
-      'title': 'Bus number 82 Delayed!',
-      'description': 'Bus to Rajpur delayed by 15 minutes due to rain!'
-    },
-    {
-      'category': 'Sports Update',
-      'title': 'Finals of Basketball',
-      'description': 'Basketball match finals today at 5 PM in Main Court'
-    },
   ];
 
   int _selectedIndex = 0;
@@ -49,9 +39,13 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
   Duration? _timeLeft;
   String _nextClassSubject = '';
   TimeOfDay? _nextClassTime;
+  bool _showAllClasses = false;
 
   final List<Map<String, dynamic>> timetable = [
-    {'subject': 'Physics', 'time': TimeOfDay(hour: 23, minute: 59)}, // 11:59 PM
+    {'subject': 'Physics', 'time': TimeOfDay(hour: 9, minute: 30), 'room': '101'},
+    {'subject': 'Mathematics', 'time': TimeOfDay(hour: 11, minute: 0), 'room': '203'},
+    {'subject': 'Computer Science', 'time': TimeOfDay(hour: 14, minute: 0), 'room': 'Lab A'},
+    {'subject': 'Chemistry', 'time': TimeOfDay(hour: 16, minute: 0), 'room': 'B1'},
   ];
 
   @override
@@ -183,10 +177,7 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
               Expanded(
                 child: Text(
                   'No more classes today!',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
             ],
@@ -199,39 +190,73 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
         ? "${_timeLeft!.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(_timeLeft!.inSeconds.remainder(60)).toString().padLeft(2, '0')}"
         : "--:--";
 
-    return Card(
-      color: Colors.lightBlueAccent,
-      margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 6,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            const Icon(Icons.access_time, size: 40, color: Colors.white),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _showAllClasses = !_showAllClasses;
+            });
+          },
+          child: Card(
+            color: Colors.lightBlueAccent,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 6,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
                 children: [
-                  Text(
-                    'Next Class: $_nextClassSubject',
-                    style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                  const Icon(Icons.access_time, size: 40, color: Colors.white),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Next Class: $_nextClassSubject',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Starts in $countdown minutes',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Starts in $countdown minutes',
-                    style: const TextStyle(color: Colors.white),
+                  Icon(
+                    _showAllClasses ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    color: Colors.white,
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
-      ),
+
+        if (_showAllClasses)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: timetable
+                  .where((entry) {
+                final classTime = entry['time'] as TimeOfDay;
+                final now = TimeOfDay.now();
+                return classTime.hour > now.hour ||
+                    (classTime.hour == now.hour && classTime.minute > now.minute);
+              })
+                  .map((entry) {
+                final time = entry['time'] as TimeOfDay;
+                return ListTile(
+                  leading: const Icon(Icons.class_),
+                  title: Text('${entry['subject']} - Room ${entry['room']}'),
+                  subtitle: Text('${time.format(context)}'),
+                );
+              }).toList(),
+            ),
+          )
+      ],
     );
   }
 
@@ -255,14 +280,6 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       case 'Event Update':
         icon = Icons.event;
         color = Colors.purple;
-        break;
-      case 'Transportation Update':
-        icon = Icons.directions_bus;
-        color = Colors.teal;
-        break;
-      case 'Sports Update':
-        icon = Icons.sports_basketball;
-        color = Colors.redAccent;
         break;
       default:
         icon = Icons.info;
@@ -304,31 +321,16 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
         onTap: _onTabTapped,
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.feed),
-            label: 'Feed',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Lost & Found',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Campus Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.feed), label: 'Feed'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Lost & Found'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Campus Map'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
   }
 
   void _addNewPost() {
-    // You can implement your own add post functionality here.
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Add New Post functionality coming soon!')),
-    );
+    // Add post logic here
   }
 }
