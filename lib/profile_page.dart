@@ -14,9 +14,14 @@ class ProfilePage extends StatelessWidget {
             // Profile Picture
             CircleAvatar(
               radius: 60,
-              backgroundImage: AssetImage('assets/camp.jpeg'), // Make sure image exists
               backgroundColor: Colors.grey[300],
+              child: Icon(
+                Icons.person,
+                size: 60,
+                color: Colors.white,
+              ),
             ),
+
             const SizedBox(height: 16),
             // Name
             const Text(
