@@ -32,6 +32,16 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       'title': 'Coding Competition Today!',
       'description': 'Starts at 2 PM in Auditorium. Register at desk.'
     },
+    {
+      'category': 'Transportation Update',
+      'title': 'Bus 5 running 10 mins late',
+      'description': 'Expect delays if you’re catching the 5 PM shuttle.'
+    },
+    {
+      'category': 'Sports Update',
+      'title': 'Football Match Today',
+      'description': 'CS Dept vs EE Dept at 4:30 PM on Main Ground.'
+    },
   ];
 
   int _selectedIndex = 0;
@@ -280,6 +290,14 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       case 'Event Update':
         icon = Icons.event;
         color = Colors.purple;
+        break;
+      case 'Transportation Update':
+        icon = Icons.directions_bus;
+        color = Colors.teal;
+        break;
+      case 'Sports Update':
+        icon = Icons.sports_soccer;
+        color = Colors.redAccent;
         break;
       default:
         icon = Icons.info;
