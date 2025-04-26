@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'indoor_map_page.dart'; // <--- Import IndoorMapPage here!
+import 'profile_page.dart';
 
 class LiveFeedPage extends StatefulWidget {
   const LiveFeedPage({super.key});
@@ -143,7 +144,7 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
     } else if (_selectedIndex == 2) {
       return const IndoorMapPage(); // <--- Call IndoorMapPage here
     } else {
-      return const Center(child: Text('Profile Page - Coming Soon'));
+      return const ProfilePage();
     }
   }
 
