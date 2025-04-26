@@ -14,23 +14,23 @@ class ProfilePage extends StatelessWidget {
             // Profile Picture
             CircleAvatar(
               radius: 60,
-              backgroundImage: AssetImage('assets/camp.jpeg'), // Or use NetworkImage
+              backgroundImage: AssetImage('assets/camp.jpeg'), // Make sure image exists
               backgroundColor: Colors.grey[300],
             ),
             const SizedBox(height: 16),
             // Name
             const Text(
-              'Merlin',
+              'Merlin Joseph',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            // Email
+            // College Email
             const Text(
-              'merlin@example.com',
+              'merlin.joseph@university.edu',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 20),
-            // Stats
+            // Academic Details
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Card(
@@ -39,12 +39,13 @@ class ProfilePage extends StatelessWidget {
                 elevation: 4,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildStatColumn('Posts', '24'),
-                      _buildStatColumn('Events', '5'),
-                      _buildStatColumn('Followers', '120'),
+                      _buildInfoRow('Roll Number', '21BCS1234'),
+                      _buildInfoRow('Branch', 'Computer Science Engineering'),
+                      _buildInfoRow('Year', '3rd Year'),
+                      _buildInfoRow('Section', 'B'),
                     ],
                   ),
                 ),
@@ -64,13 +65,14 @@ class ProfilePage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
                       Text(
-                        'About',
+                        'About Me',
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Passionate learner. Loves tech, coding competitions, and participating in campus events.',
+                        'An enthusiastic Computer Science student at ABC University. '
+                            'Actively participating in coding contests, tech fests, and research projects.',
                         style: TextStyle(fontSize: 16, color: Colors.black87),
                       ),
                     ],
@@ -82,7 +84,7 @@ class ProfilePage extends StatelessWidget {
             // Button
             ElevatedButton(
               onPressed: () {
-                // Add functionality like "Edit Profile"
+                // You can navigate to Academic Records page here
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueAccent,
@@ -90,7 +92,7 @@ class ProfilePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30)),
                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
               ),
-              child: const Text('Edit Profile', style: TextStyle(fontSize: 18)),
+              child: const Text('View Academic Records', style: TextStyle(fontSize: 18)),
             ),
             const SizedBox(height: 30),
           ],
@@ -99,19 +101,30 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatColumn(String title, String count) {
-    return Column(
-      children: [
-        Text(
-          count,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-      ],
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Text(
+            '$label:',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
