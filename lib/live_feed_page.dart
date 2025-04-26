@@ -1,4 +1,4 @@
-import 'dart:async'; // For Timer
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'indoor_map_page.dart';
 import 'profile_page.dart';
@@ -34,25 +34,19 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
     },
   ];
 
-
   int _selectedIndex = 0;
-  Timer? _timer; // Timer for updating countdown
+  Timer? _timer;
   Duration? _timeLeft;
   String _nextClassSubject = '';
   TimeOfDay? _nextClassTime;
-
-  // Dummy timetable
-  // final List<Map<String, dynamic>> timetable = [
-  //   {'subject': 'Physics', 'time': TimeOfDay(hour: 9, minute: 30)},
-  //   {'subject': 'Mathematics', 'time': TimeOfDay(hour: 11, minute: 0)},
-  //   {'subject': 'Computer Science', 'time': TimeOfDay(hour: 14, minute: 0)},
-  //   {'subject': 'Chemistry', 'time': TimeOfDay(hour: 16, minute: 0)},
-  // ];
+  bool _showAllClasses = false;
 
   final List<Map<String, dynamic>> timetable = [
-    {'subject': 'Physics', 'time': TimeOfDay(hour: 23, minute: 59)}, // 11:59 PM
+    {'subject': 'Physics', 'time': TimeOfDay(hour: 9, minute: 30), 'room': '101'},
+    {'subject': 'Mathematics', 'time': TimeOfDay(hour: 11, minute: 0), 'room': '203'},
+    {'subject': 'Computer Science', 'time': TimeOfDay(hour: 14, minute: 0), 'room': 'Lab A'},
+    {'subject': 'Chemistry', 'time': TimeOfDay(hour: 16, minute: 0), 'room': 'B1'},
   ];
-
 
   @override
   void initState() {
@@ -87,7 +81,6 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       }
     }
 
-    // No more classes today
     setState(() {
       _nextClassSubject = '';
       _nextClassTime = null;
@@ -110,7 +103,7 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
     final diff = nextClassDateTime.difference(now);
 
     if (diff.isNegative) {
-      _findNextClass(); // Find next class if current time passed
+      _findNextClass();
     } else {
       setState(() {
         _timeLeft = diff;
@@ -135,7 +128,7 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
     if (_selectedIndex == 0) {
       return Column(
         children: [
-          _buildNextClassCard(), // Always show something (next class or no class)
+          _buildNextClassCard(),
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refreshPosts,
@@ -159,9 +152,7 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
           ),
         ],
       );
-    }
-    // (Other tabs are unchanged)
-    else if (_selectedIndex == 1) {
+    } else if (_selectedIndex == 1) {
       return const Center(child: Text('Lost & Found Page - Coming Soon'));
     } else if (_selectedIndex == 2) {
       return const IndoorMapPage();
@@ -170,10 +161,8 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
     }
   }
 
-
   Widget _buildNextClassCard() {
     if (_nextClassTime == null) {
-      // No next class today
       return Card(
         color: Colors.redAccent,
         margin: const EdgeInsets.all(16),
@@ -188,10 +177,7 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
               Expanded(
                 child: Text(
                   'No more classes today!',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
             ],
@@ -200,47 +186,79 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       );
     }
 
-    // Otherwise show next class countdown
     String countdown = _timeLeft != null
         ? "${_timeLeft!.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(_timeLeft!.inSeconds.remainder(60)).toString().padLeft(2, '0')}"
         : "--:--";
 
-    return Card(
-      color: Colors.lightBlueAccent,
-      margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 6,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            const Icon(Icons.access_time, size: 40, color: Colors.white),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _showAllClasses = !_showAllClasses;
+            });
+          },
+          child: Card(
+            color: Colors.lightBlueAccent,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 6,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
                 children: [
-                  Text(
-                    'Next Class: $_nextClassSubject',
-                    style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                  const Icon(Icons.access_time, size: 40, color: Colors.white),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Next Class: $_nextClassSubject',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Starts in $countdown minutes',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Starts in $countdown minutes',
-                    style: const TextStyle(color: Colors.white),
+                  Icon(
+                    _showAllClasses ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    color: Colors.white,
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
-      ),
+
+        if (_showAllClasses)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: timetable
+                  .where((entry) {
+                final classTime = entry['time'] as TimeOfDay;
+                final now = TimeOfDay.now();
+                return classTime.hour > now.hour ||
+                    (classTime.hour == now.hour && classTime.minute > now.minute);
+              })
+                  .map((entry) {
+                final time = entry['time'] as TimeOfDay;
+                return ListTile(
+                  leading: const Icon(Icons.class_),
+                  title: Text('${entry['subject']} - Room ${entry['room']}'),
+                  subtitle: Text('${time.format(context)}'),
+                );
+              }).toList(),
+            ),
+          )
+      ],
     );
   }
-
 
   Widget _buildCategoryIcon(String? category) {
     IconData icon;
@@ -283,7 +301,6 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
         actions: [
           IconButton(
             onPressed: () {
-              // Notifications Page - coming soon
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('No new notifications')),
               );
@@ -304,28 +321,16 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
         onTap: _onTabTapped,
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.feed),
-            label: 'Feed',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Lost & Found',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Campus Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.feed), label: 'Feed'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Lost & Found'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Campus Map'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
   }
 
   void _addNewPost() {
-    // (your add post function, unchanged)
+    // Add post logic here
   }
 }
