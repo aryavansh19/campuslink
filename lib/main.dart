@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'live_feed_page.dart'; // Import the LiveFeedPage here
+import 'live_feed_page.dart'; // Import LiveFeedPage
+import 'indoor_map_page.dart'; // Import IndoorMapPage (needed inside tabs)
 
 void main() {
   runApp(const MyApp());

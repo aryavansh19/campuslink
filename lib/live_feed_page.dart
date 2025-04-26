@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'indoor_map_page.dart'; // <--- Import IndoorMapPage here!
 
 class LiveFeedPage extends StatefulWidget {
   const LiveFeedPage({super.key});
@@ -139,6 +140,8 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       );
     } else if (_selectedIndex == 1) {
       return const Center(child: Text('Lost & Found Page - Coming Soon'));
+    } else if (_selectedIndex == 2) {
+      return const IndoorMapPage(); // <--- Call IndoorMapPage here
     } else {
       return const Center(child: Text('Profile Page - Coming Soon'));
     }
@@ -193,6 +196,7 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onTabTapped,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.feed),
@@ -201,6 +205,10 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Lost & Found',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            label: 'Campus Map', // <-- New Tab
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
