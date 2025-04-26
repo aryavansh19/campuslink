@@ -32,27 +32,27 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       'title': 'Coding Competition Today!',
       'description': 'Starts at 2 PM in Auditorium. Register at desk.'
     },
+    {
+      'category': 'Transportation Update',
+      'title': 'Bus number 82 Delayed!',
+      'description': 'Bus to Rajpur delayed by 15 minutes due to rain!'
+    },
+    {
+      'category': 'Sports Update',
+      'title': 'Finals of Basketball',
+      'description': 'Basketball match finals today at 5 PM in Main Court'
+    },
   ];
 
-
   int _selectedIndex = 0;
-  Timer? _timer; // Timer for updating countdown
+  Timer? _timer;
   Duration? _timeLeft;
   String _nextClassSubject = '';
   TimeOfDay? _nextClassTime;
 
-  // Dummy timetable
-  // final List<Map<String, dynamic>> timetable = [
-  //   {'subject': 'Physics', 'time': TimeOfDay(hour: 9, minute: 30)},
-  //   {'subject': 'Mathematics', 'time': TimeOfDay(hour: 11, minute: 0)},
-  //   {'subject': 'Computer Science', 'time': TimeOfDay(hour: 14, minute: 0)},
-  //   {'subject': 'Chemistry', 'time': TimeOfDay(hour: 16, minute: 0)},
-  // ];
-
   final List<Map<String, dynamic>> timetable = [
     {'subject': 'Physics', 'time': TimeOfDay(hour: 23, minute: 59)}, // 11:59 PM
   ];
-
 
   @override
   void initState() {
@@ -87,7 +87,6 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       }
     }
 
-    // No more classes today
     setState(() {
       _nextClassSubject = '';
       _nextClassTime = null;
@@ -110,7 +109,7 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
     final diff = nextClassDateTime.difference(now);
 
     if (diff.isNegative) {
-      _findNextClass(); // Find next class if current time passed
+      _findNextClass();
     } else {
       setState(() {
         _timeLeft = diff;
@@ -135,7 +134,7 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
     if (_selectedIndex == 0) {
       return Column(
         children: [
-          _buildNextClassCard(), // Always show something (next class or no class)
+          _buildNextClassCard(),
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refreshPosts,
@@ -159,9 +158,7 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
           ),
         ],
       );
-    }
-    // (Other tabs are unchanged)
-    else if (_selectedIndex == 1) {
+    } else if (_selectedIndex == 1) {
       return const Center(child: Text('Lost & Found Page - Coming Soon'));
     } else if (_selectedIndex == 2) {
       return const IndoorMapPage();
@@ -170,10 +167,8 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
     }
   }
 
-
   Widget _buildNextClassCard() {
     if (_nextClassTime == null) {
-      // No next class today
       return Card(
         color: Colors.redAccent,
         margin: const EdgeInsets.all(16),
@@ -200,7 +195,6 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
       );
     }
 
-    // Otherwise show next class countdown
     String countdown = _timeLeft != null
         ? "${_timeLeft!.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(_timeLeft!.inSeconds.remainder(60)).toString().padLeft(2, '0')}"
         : "--:--";
@@ -241,7 +235,6 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
     );
   }
 
-
   Widget _buildCategoryIcon(String? category) {
     IconData icon;
     Color color;
@@ -263,6 +256,14 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
         icon = Icons.event;
         color = Colors.purple;
         break;
+      case 'Transportation Update':
+        icon = Icons.directions_bus;
+        color = Colors.teal;
+        break;
+      case 'Sports Update':
+        icon = Icons.sports_basketball;
+        color = Colors.redAccent;
+        break;
       default:
         icon = Icons.info;
         color = Colors.grey;
@@ -283,7 +284,6 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
         actions: [
           IconButton(
             onPressed: () {
-              // Notifications Page - coming soon
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('No new notifications')),
               );
@@ -326,6 +326,9 @@ class _LiveFeedPageState extends State<LiveFeedPage> {
   }
 
   void _addNewPost() {
-    // (your add post function, unchanged)
+    // You can implement your own add post functionality here.
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Add New Post functionality coming soon!')),
+    );
   }
 }
